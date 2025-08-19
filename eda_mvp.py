@@ -1,7 +1,7 @@
 import argparse
 import os
 from pathlib import Path
-
+from ydata-profiling import ProfileReport
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -112,6 +112,8 @@ def run_eda(file_path: str, sep: str = ",", encoding: str = "utf-8", na_values: 
     print(f"- Text summary: {out_dir / 'summary.txt'}")
     print(f"- Sample head:  {out_dir / 'sample_head.csv'}")
     print(f"- Charts saved in: {out_dir.resolve()}")
+    generate_html_report(df, out_dir="outputs")
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="Minimal Auto-EDA (Phase 1 MVP)")
@@ -121,6 +123,16 @@ def parse_args():
     p.add_argument("--na-values", default=None, help="Additional strings to treat as NA, e.g. 'NA;None'")
     p.add_argument("--limit-rows", type=int, default=None, help="Process only first N rows (speed/debug)")
     return p.parse_args()
+
+def generate_html_report(df, out_dir="outputs"):
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    profile = ProfileReport(df, title="AutoEDA Report", explorative=True)
+    report_path = out_dir / "eda_report.html"
+    profile.to_file(report_path)
+    print(f"📊 HTML report saved at: {report_path}")
+
 
 if __name__ == "__main__":
     args = parse_args()
